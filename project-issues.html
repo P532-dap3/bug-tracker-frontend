@@ -1,88 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Project Issues Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 min-h-screen">
 
-<body class="bg-gray-100 min-h-screen p-6">
-<div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
-  <h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">Project Dashboard</h1>
+  <!-- Navbar -->
+  <nav class="bg-indigo-700 text-white py-4 px-6">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Bug Tracker</h1>
+      <ul class="flex space-x-6">
+        <li><a href="index.html" class="hover:underline">Dashboard</a></li>
+        <li><a href="create-project.html" class="hover:underline">Create Project</a></li>
+        <li><a href="create-issue.html" class="hover:underline">Create Issue</a></li>
+        <li><a href="view-project.html" class="hover:underline">View Projects</a></li>
+        <li><a href="view-issues.html" class="hover:underline">View Issues</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <div id="dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div>
-      <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">OPEN</h2>
-      <div id="openColumn" class="space-y-4"></div>
-    </div>
-    <div>
-      <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">IN PROGRESS</h2>
-      <div id="inProgressColumn" class="space-y-4"></div>
-    </div>
-    <div>
-      <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">RESOLVED</h2>
-      <div id="resolvedColumn" class="space-y-4"></div>
-    </div>
-    <div>
-      <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">CLOSED</h2>
-      <div id="closedColumn" class="space-y-4"></div>
+  <!-- Project Issues Dashboard -->
+  <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
+    <h1 class="text-3xl font-bold text-blue-700 mb-6 text-center">Project Dashboard</h1>
+
+    <div id="dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div ondrop="handleDrop(event, 'OPEN')" ondragover="allowDrop(event)">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">OPEN</h2>
+        <div id="openColumn" class="space-y-4 min-h-[100px]"></div>
+      </div>
+      <div ondrop="handleDrop(event, 'IN_PROGRESS')" ondragover="allowDrop(event)">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">IN PROGRESS</h2>
+        <div id="inProgressColumn" class="space-y-4 min-h-[100px]"></div>
+      </div>
+      <div ondrop="handleDrop(event, 'RESOLVED')" ondragover="allowDrop(event)">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">RESOLVED</h2>
+        <div id="resolvedColumn" class="space-y-4 min-h-[100px]"></div>
+      </div>
+      <div ondrop="handleDrop(event, 'CLOSED')" ondragover="allowDrop(event)">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2 text-center">CLOSED</h2>
+        <div id="closedColumn" class="space-y-4 min-h-[100px]"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  const base_url = "http://localhost:8080";
+  <script>
+    const base_url = "http://localhost:8080";
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get("projectId");
 
-  // Get projectId from query params (e.g., ?projectId=1)
-  const urlParams = new URLSearchParams(window.location.search);
-  const projectId = urlParams.get("projectId");
+    function allowDrop(event) {
+      event.preventDefault();
+    }
 
-  if (!projectId) {
-    document.getElementById("dashboard").innerHTML = '<p class="text-red-500 text-center">Missing project ID.</p>';
-  } else {
-    fetch(`${base_url}/api/issues/project/${projectId}`)
-      .then(res => res.json())
-      .then(issues => {
-        const statusMap = {
-          OPEN: document.getElementById("openColumn"),
-          IN_PROGRESS: document.getElementById("inProgressColumn"),
-          RESOLVED: document.getElementById("resolvedColumn"),
-          CLOSED: document.getElementById("closedColumn")
-        };
+    function handleDrop(event, newStatus) {
+      event.preventDefault();
+      const issueId = event.dataTransfer.getData("issueId");
+      const card = document.getElementById(`issue-${issueId}`);
+      const targetColumn = document.getElementById(getColumnId(newStatus));
 
-        if (issues.length === 0) {
-          Object.values(statusMap).forEach(container => {
-            container.innerHTML = '<p class="text-sm text-gray-500 text-center">No issues</p>';
-          });
-          return;
+      // Update UI immediately
+      targetColumn.appendChild(card);
+
+      // Send status update to backend
+      fetch(`${base_url}/api/issues/${issueId}/status/${newStatus}`, {
+        method: "PATCH"
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to update status.");
         }
-
-        issues.forEach(issue => {
-          const card = document.createElement("div");
-          card.className = "bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm";
-
-          // Do NOT display `subIssues`
-          card.innerHTML = `
-            <h3 class="text-md font-semibold text-gray-800">${issue.title}</h3>
-            <p class="text-sm text-gray-600 mt-1">${issue.description}</p>
-            <p class="text-sm mt-2"><strong>Priority:</strong> ${issue.priority}</p>
-            <p class="text-sm"><strong>Assigned To:</strong> ${issue.assignedUsername ?? 'N/A'}</p>
-          `;
-
-          const column = statusMap[issue.status];
-          if (column) {
-            column.appendChild(card);
-          }
-        });
       })
       .catch(err => {
+        alert("Error updating status.");
         console.error(err);
-        document.getElementById("dashboard").innerHTML =
-          '<p class="text-red-500 text-center">Failed to load issues.</p>';
       });
-  }
-</script>
+    }
+
+    function getColumnId(status) {
+      return {
+        OPEN: "openColumn",
+        IN_PROGRESS: "inProgressColumn",
+        RESOLVED: "resolvedColumn",
+        CLOSED: "closedColumn"
+      }[status];
+    }
+
+    if (!projectId) {
+      document.getElementById("dashboard").innerHTML = '<p class="text-red-500 text-center">Missing project ID.</p>';
+    } else {
+      fetch(`${base_url}/api/issues/project/${projectId}`)
+        .then(res => res.json())
+        .then(issues => {
+          const statusMap = {
+            OPEN: document.getElementById("openColumn"),
+            IN_PROGRESS: document.getElementById("inProgressColumn"),
+            RESOLVED: document.getElementById("resolvedColumn"),
+            CLOSED: document.getElementById("closedColumn")
+          };
+
+          if (issues.length === 0) {
+            Object.values(statusMap).forEach(container => {
+              container.innerHTML = '<p class="text-sm text-gray-500 text-center">No issues</p>';
+            });
+            return;
+          }
+
+          issues.forEach(issue => {
+            const card = document.createElement("div");
+            card.id = `issue-${issue.id}`;
+            card.className = "bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm cursor-move";
+            card.draggable = true;
+            card.ondragstart = (e) => {
+              e.dataTransfer.setData("issueId", issue.id);
+            };
+
+            card.innerHTML = `
+              <h3 class="text-md font-semibold text-gray-800">${issue.title}</h3>
+              <p class="text-sm text-gray-600 mt-1">${issue.description}</p>
+              <p class="text-sm mt-2"><strong>Priority:</strong> ${issue.priority}</p>
+              <p class="text-sm"><strong>Assigned To:</strong> ${issue.assignedUsername ?? 'N/A'}</p>
+            `;
+
+            const column = statusMap[issue.status];
+            if (column) {
+              column.appendChild(card);
+            }
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById("dashboard").innerHTML =
+            '<p class="text-red-500 text-center">Failed to load issues.</p>';
+        });
+    }
+  </script>
+
 </body>
 </html>

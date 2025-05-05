@@ -8,133 +8,150 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-<div class="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl">
-  <h2 class="text-2xl font-bold mb-6 text-center text-green-700">Create Issue</h2>
-  <form id="issueForm" class="space-y-4">
-    <div>
-      <label for="title" class="block text-gray-700 font-medium">Title</label>
-      <input type="text" id="title" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
-    </div>
-    <div>
-      <label for="description" class="block text-gray-700 font-medium">Description</label>
-      <textarea id="description" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg"></textarea>
-    </div>
-    <div>
-      <label for="status" class="block text-gray-700 font-medium">Status</label>
-      <select id="status" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
-        <option value="OPEN">OPEN</option>
-        <option value="IN_PROGRESS">IN_PROGRESS</option>
-        <option value="RESOLVED">RESOLVED</option>
-        <option value="CLOSED">CLOSED</option>
-      </select>
-    </div>
-    <div>
-      <label for="priority" class="block text-gray-700 font-medium">Priority</label>
-      <select id="priority" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
-        <option value="LOW">LOW</option>
-        <option value="MEDIUM">MEDIUM</option>
-        <option value="HIGH">HIGH</option>
-        <option value="CRITICAL">CRITICAL</option>
-      </select>
-    </div>
-    <div>
-      <label for="projectId" class="block text-gray-700 font-medium">Project</label>
-      <select id="projectId" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
-        <option value="">Select a project</option>
-      </select>
-    </div>
-    <div>
-      <label for="assignedUserId" class="block text-gray-700 font-medium">Assigned User</label>
-      <select id="assignedUserId" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
-        <option value="">Select a user</option>
-      </select>
-    </div>
-    <div>
-      <label for="parentIssueId" class="block text-gray-700 font-medium">Parent Issue (optional)</label>
-      <select id="parentIssueId" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
-        <option value="">None</option>
-      </select>
-    </div>
-    <div class="text-center">
-      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Create Issue</button>
-    </div>
-  </form>
-</div>
+<body class="bg-gray-100 min-h-screen">
 
-<script>
-  let base_url = "http://localhost:8080";
-  // Populate users
-  fetch(base_url + '/api/users')
-    .then(res => res.json())
-    .then(users => {
-      const userSelect = document.getElementById('assignedUserId');
-      users.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.id;
-        option.textContent = `${user.username} (${user.email})`;
-        userSelect.appendChild(option);
-      });
-    });
+  <!-- Navbar -->
+  <nav class="bg-indigo-700 text-white py-4 px-6">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Bug Tracker</h1>
+      <ul class="flex space-x-6">
+        <li><a href="index.html" class="hover:underline">Dashboard</a></li>
+        <li><a href="create-project.html" class="hover:underline">Create Project</a></li>
+        <li><a href="create-issue.html" class="hover:underline">Create Issue</a></li>
+        <li><a href="view-project.html" class="hover:underline">View Projects</a></li>
+        <li><a href="view-issues.html" class="hover:underline">View Issues</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  // Populate projects
-  fetch(base_url + '/api/projects')
-    .then(res => res.json())
-    .then(projects => {
-      const projectSelect = document.getElementById('projectId');
-      projects.forEach(project => {
-        const option = document.createElement('option');
-        option.value = project.id;
-        option.textContent = `${project.name}`;
-        projectSelect.appendChild(option);
-      });
-    });
+  <!-- Create Issue Form -->
+  <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl mx-auto mt-12">
+    <h2 class="text-2xl font-bold mb-6 text-center text-indigo-700">Create Issue</h2>
+    <form id="issueForm" class="space-y-4">
+      <div>
+        <label for="title" class="block text-gray-700 font-medium">Title</label>
+        <input type="text" id="title" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+      </div>
+      <div>
+        <label for="description" class="block text-gray-700 font-medium">Description</label>
+        <textarea id="description" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg"></textarea>
+      </div>
+      <div>
+        <label for="status" class="block text-gray-700 font-medium">Status</label>
+        <select id="status" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+          <option value="OPEN">OPEN</option>
+          <option value="IN_PROGRESS">IN_PROGRESS</option>
+          <option value="RESOLVED">RESOLVED</option>
+          <option value="CLOSED">CLOSED</option>
+        </select>
+      </div>
+      <div>
+        <label for="priority" class="block text-gray-700 font-medium">Priority</label>
+        <select id="priority" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+          <option value="CRITICAL">CRITICAL</option>
+        </select>
+      </div>
+      <div>
+        <label for="projectId" class="block text-gray-700 font-medium">Project</label>
+        <select id="projectId" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+          <option value="">Select a project</option>
+        </select>
+      </div>
+      <div>
+        <label for="assignedUserId" class="block text-gray-700 font-medium">Assigned User</label>
+        <select id="assignedUserId" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+          <option value="">Select a user</option>
+        </select>
+      </div>
+      <div>
+        <label for="parentIssueId" class="block text-gray-700 font-medium">Parent Issue (optional)</label>
+        <select id="parentIssueId" class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+          <option value="">None</option>
+        </select>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-700">Create Issue</button>
+      </div>
+    </form>
+  </div>
 
-  // Populate parent issues
-  fetch(base_url + '/api/issues')
-    .then(res => res.json())
-    .then(issues => {
-      const parentSelect = document.getElementById('parentIssueId');
-      issues.forEach(issue => {
-        if(issue.parentIssueId == -1){
+  <script>
+    let base_url = "http://localhost:8080";
+    // Populate users
+    fetch(base_url + '/api/users')
+      .then(res => res.json())
+      .then(users => {
+        const userSelect = document.getElementById('assignedUserId');
+        users.forEach(user => {
           const option = document.createElement('option');
-          option.value = issue.id;
-          option.textContent = `#${issue.id} - ${issue.title}`;
-          parentSelect.appendChild(option);
+          option.value = user.id;
+          option.textContent = `${user.username} (${user.email})`;
+          userSelect.appendChild(option);
+        });
+      });
+
+    // Populate projects
+    fetch(base_url + '/api/projects')
+      .then(res => res.json())
+      .then(projects => {
+        const projectSelect = document.getElementById('projectId');
+        projects.forEach(project => {
+          const option = document.createElement('option');
+          option.value = project.id;
+          option.textContent = `${project.name}`;
+          projectSelect.appendChild(option);
+        });
+      });
+
+    // Populate parent issues
+    fetch(base_url + '/api/issues')
+      .then(res => res.json())
+      .then(issues => {
+        const parentSelect = document.getElementById('parentIssueId');
+        issues.forEach(issue => {
+          if(issue.parentIssueId == -1){
+            const option = document.createElement('option');
+            option.value = issue.id;
+            option.textContent = `#${issue.id} - ${issue.title}`;
+            parentSelect.appendChild(option);
+          }
+        });
+      });
+
+    // Form submission handler
+    document.getElementById('issueForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const body = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        status: document.getElementById('status').value,
+        priority: document.getElementById('priority').value,
+        projectId: parseInt(document.getElementById('projectId').value),
+        assignedUserId: document.getElementById('assignedUserId').value ? parseInt(document.getElementById('assignedUserId').value) : null,
+        parentIssueId: document.getElementById('parentIssueId').value ? parseInt(document.getElementById('parentIssueId').value) : null
+      };
+
+      fetch(base_url + '/api/issues', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Issue created successfully!');
+          window.location.href = 'index.html';
+        } else {
+          alert('Failed to create issue.');
         }
       });
     });
-
-  // Form submission handler
-  document.getElementById('issueForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const body = {
-      title: document.getElementById('title').value,
-      description: document.getElementById('description').value,
-      status: document.getElementById('status').value,
-      priority: document.getElementById('priority').value,
-      projectId: parseInt(document.getElementById('projectId').value),
-      assignedUserId: document.getElementById('assignedUserId').value ? parseInt(document.getElementById('assignedUserId').value) : null,
-      parentIssueId: document.getElementById('parentIssueId').value ? parseInt(document.getElementById('parentIssueId').value) : null
-    };
-
-    fetch('/api/issues', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    })
-    .then(response => {
-      if (response.ok) {
-        alert('Issue created successfully!');
-        window.location.href = 'index.html';
-      } else {
-        alert('Failed to create issue.');
-      }
-    });
-  });
-</script>
+  </script>
 </body>
+
 </html>
