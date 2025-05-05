@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen py-12 px-4">
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-3xl font-bold text-center mb-8 text-indigo-700">Bug Tracker Dashboard</h1>
+  <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+    <div class="bg-white p-6 rounded-lg shadow text-center">
+      <h2 class="text-xl font-semibold text-gray-700">Total Projects</h2>
+      <p id="projectCount" class="text-2xl font-bold text-indigo-600">0</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow text-center">
+      <h2 class="text-xl font-semibold text-gray-700">Total Users</h2>
+      <p id="userCount" class="text-2xl font-bold text-indigo-600">0</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow text-center">
+      <h2 class="text-xl font-semibold text-gray-700">Total Issues</h2>
+      <p id="issueCount" class="text-2xl font-bold text-indigo-600">0</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow text-center">
+      <h2 class="text-xl font-semibold text-gray-700">Total Sub-Issues</h2>
+      <p id="subIssueCount" class="text-2xl font-bold text-indigo-600">0</p>
+    </div>
+  </div>
+  <div class="text-center space-x-4">
+    <a href="create-project.html" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Create Project</a>
+    <a href="create-issue.html" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Create Issue</a>
+    <a href="view-project.html" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">View Project</a>
+    <a href="view-issues.html" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">View Issues</a>
+  </div>
+</div>
+<script>
+  async function fetchData() {
+      let base_url = "http://localhost:8080";
+      const [projects, users, issues] = await Promise.all([
+          fetch(base_url + '/api/projects').then(res => res.json()),
+          fetch(base_url + '/api/users').then(res => res.json()),
+          fetch(base_url + '/api/issues').then(res => res.json())
+      ]);
+
+      document.getElementById('projectCount').textContent = projects.length;
+      document.getElementById('userCount').textContent = users.length;
+      document.getElementById('issueCount').textContent = issues.length;
+      document.getElementById('subIssueCount').textContent = issues.reduce((sum, issue) => sum + (issue.subIssues ? issue.subIssues.length : 0), 0);
+  }
+
+  fetchData();
+</script>
+</body>
+
+</html>

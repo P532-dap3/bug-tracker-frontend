@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Update Issue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<div class="bg-white shadow-md rounded-lg p-8 w-full max-w-xl">
+    <h2 class="text-2xl font-bold mb-6 text-blue-700 text-center">Update Issue</h2>
+    <form id="updateIssueForm" class="space-y-4">
+        <input type="hidden" id="issueId" />
+
+        <div>
+            <label for="title" class="block font-medium">Title</label>
+            <input type="text" id="title" class="w-full p-2 border rounded" placeholder="Enter title" required />
+        </div>
+
+        <div>
+            <label for="description" class="block font-medium">Description</label>
+            <textarea id="description" class="w-full p-2 border rounded" placeholder="Enter description" required></textarea>
+        </div>
+
+        <div>
+            <label for="status" class="block font-medium">Status</label>
+            <select id="status" class="w-full p-2 border rounded">
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="priority" class="block font-medium">Priority</label>
+            <select id="priority" class="w-full p-2 border rounded">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="assignedUsername" class="block font-medium">Assigned Username</label>
+            <select id="assignedUsername" class="w-full p-2 border rounded" required>
+                <!-- Dropdown will be populated dynamically -->
+            </select>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Issue</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const base_url = "http://localhost:8080";
+    const urlParams = new URLSearchParams(window.location.search);
+    const issueId = urlParams.get("id");
+
+    async function loadIssue() {
+      const issueRes = await fetch(`${base_url}/api/issues/${issueId}`);
+      const issue = await issueRes.json();
+
+      // Prefill fields with issue data
+      document.getElementById("issueId").value = issue.id;
+      document.getElementById("title").value = issue.title;
+      document.getElementById("description").value = issue.description;
+      document.getElementById("status").value = issue.status;
+      document.getElementById("priority").value = issue.priority;
+
+      // Fetch the assigned user dropdown
+      const userRes = await fetch(`${base_url}/api/users`);
+      const users = await userRes.json();
+
+      const usernameSelect = document.getElementById("assignedUsername");
+      users.forEach(user => {
+        const option = document.createElement("option");
+        option.value = user.id;
+        option.textContent = user.username;
+        if (user.id === issue.assignedUserId) {
+          option.selected = true; // Pre-select the current user
+        }
+        usernameSelect.appendChild(option);
+      });
+    }
+
+    document.getElementById("updateIssueForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const updatedIssue = {
+        title: document.getElementById("title").value,
+        description: document.getElementById("description").value,
+        status: document.getElementById("status").value,
+        priority: document.getElementById("priority").value,
+        assignedUserId: parseInt(document.getElementById("assignedUsername").value),
+      };
+
+      const res = await fetch(`${base_url}/api/issues/${issueId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updatedIssue)
+      });
+
+      if (res.ok) {
+        alert("Issue updated successfully!");
+        window.location.href = "view-issues.html";
+      } else {
+        alert("Failed to update issue.");
+      }
+    });
+
+    loadIssue();
+</script>
+</body>
+</html>
