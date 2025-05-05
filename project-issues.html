@@ -60,21 +60,37 @@
       const issueId = event.dataTransfer.getData("issueId");
       const card = document.getElementById(`issue-${issueId}`);
       const targetColumn = document.getElementById(getColumnId(newStatus));
+      const originalColumn = card.parentNode;
 
-      // Update UI immediately
+      // Optimistically update UI
       targetColumn.appendChild(card);
 
-      // Send status update to backend
       fetch(`${base_url}/api/issues/${issueId}/status/${newStatus}`, {
-        method: "PATCH"
+        method: "PUT"
       })
-      .then(response => {
+      .then(async (response) => {
         if (!response.ok) {
-          throw new Error("Failed to update status.");
+          // Revert card if update fails
+          originalColumn.appendChild(card);
+
+          // Try to parse JSON error message
+          let errorMsg = "Error updating status.";
+          try {
+            const data = await response.json();
+            if (data.message) errorMsg = data.message;
+          } catch (err) {
+            console.error("Could not parse error message.", err);
+          }
+
+          alert(errorMsg);
+        } else {
+          alert("Issue status updated successfully.");
         }
       })
       .catch(err => {
-        alert("Error updating status.");
+        // Revert on fetch/network failure
+        originalColumn.appendChild(card);
+        alert("Network error while updating status.");
         console.error(err);
       });
     }
